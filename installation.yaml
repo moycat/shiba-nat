@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: shiba-nat
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shiba-nat-gateway
+  namespace: shiba-nat
+spec:
+  selector:
+    app: shiba-nat-gateway
+  ports:
+    - protocol: UDP
+      port: 7628
+      targetPort: 7628
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: shiba-nat-gateway
+  namespace: shiba-nat
+  labels:
+    app: shiba-nat
+spec:
+  selector:
+    matchLabels:
+      app: shiba-nat-gateway
+  template:
+    metadata:
+      labels:
+        app: shiba-nat-gateway
+    spec:
+      containers:
+        - name: shiba
+          image: moycat/shiba-nat:latest
+          args: [ "gateway" ]
+          env:
+#            - name: SHIBA_PPROFPORT
+#              value: "8888"
+#            - name: SHIBA_DEBUG
+#              value: "true"
+      nodeSelector:
+        shiba/nat: gateway
+      restartPolicy: Always
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: shiba-nat-client
+  namespace: shiba-nat
+  labels:
+    app: shiba-nat
+spec:
+  selector:
+    matchLabels:
+      app: shiba-nat-client
+  template:
+    metadata:
+      labels:
+        app: shiba-nat-client
+    spec:
+      containers:
+        - name: shiba
+          image: moycat/shiba-nat:latest
+          args: [ "client" ]
+          env:
+#            - name: SHIBA_PPROFPORT
+#              value: "8888"
+#            - name: SHIBA_DEBUG
+#              value: "true"
+          securityContext:
+            privileged: true
+      nodeSelector:
+        shiba/nat: client
+      restartPolicy: Always
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      tolerations:
+        - operator: Exists
