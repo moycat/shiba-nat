@@ -1,0 +1,25 @@
+name: Build
+on: [ push, pull_request ]
+jobs:
+  build:
+    name: Build ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [ "amd64", "arm64" ]
+    env:
+      CGO_ENABLED: "0"
+      GOOS: "linux"
+      GOARCH: "${{ matrix.arch }}"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: "1.17"
+      - run: go build -ldflags "-w -s" -o "output/gateway_${{ matrix.arch }}" github.com/moycat/shiba-nat/cmd/gateway
+      - run: go build -ldflags "-w -s" -o "output/client_${{ matrix.arch }}" github.com/moycat/shiba-nat/cmd/client
+      - uses: actions/upload-artifact@v2
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        with:
+          name: "shiba-nat_${{ matrix.arch }}"
+          path: "output/*"
