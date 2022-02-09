@@ -33,12 +33,12 @@ spec:
         app: shiba-nat-gateway
     spec:
       containers:
-        - name: shiba
+        - name: shiba-nat-gateway
           image: moycat/shiba-nat:latest
           args: [ "gateway" ]
           env:
 #            - name: SHIBA_PPROFPORT
-#              value: "8888"
+#              value: "7628"
 #            - name: SHIBA_DEBUG
 #              value: "true"
       nodeSelector:
@@ -65,12 +65,12 @@ spec:
         app: shiba-nat-client
     spec:
       containers:
-        - name: shiba
+        - name: shiba-nat-client
           image: moycat/shiba-nat:latest
           args: [ "client" ]
           env:
 #            - name: SHIBA_PPROFPORT
-#              value: "8888"
+#              value: "7628"
 #            - name: SHIBA_DEBUG
 #              value: "true"
           securityContext:
