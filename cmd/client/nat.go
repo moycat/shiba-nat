@@ -102,6 +102,7 @@ func heartbeatNAT(ip net.IP, port int, errCh chan<- error) {
 		continuousErrorCount++
 		if continuousErrorCount > heartbeatMaxError {
 			errCh <- fmt.Errorf("failed to heartbeat continuously, the last error: %w", err)
+			return
 		}
 	}
 }
